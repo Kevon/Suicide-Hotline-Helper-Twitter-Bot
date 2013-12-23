@@ -276,7 +276,7 @@ def errorHandler(status):
         print "403 ERROR: Forbidden action. Could be a duplicate Tweet."
 
     elif status == 64:
-        print "64 ERROR: Account Suspended. Shutting the bot down."
+        print "64 ERROR: Account Suspended. Sending an email and shutting the bot down."
         if sendEmail(status, "SHUT DOWN: Need to manually restart."):
             print "Successfully sent email to "+myEmail
         else:
@@ -305,3 +305,16 @@ def onExit():
     print "Exit Successful. Congrats!"
 
 run()
+
+#I recently created a Twitter bot that identifies suicidal tweets of users and responds with the phone number for the National Suicide Prevention Lifeline if they need it. I made sure to only return tweets that contain a suicidal trigger word, an action verb or desire word like "want" or "commit" or "think", and a personal pronoun like "myself" or "I" to narrow down the returned tweets to only possibly be tweets that are of someone expressing desire to harm themself. I then performed sentiment analysis to further filter down the returned tweets and only identify ones that are of a really negative mood and highly emotional, as well as filter out most false positives are sarcastic tweets that don't require hotline information.
+
+#The tweets the bot was responding to were accurate for the most part, and will continue to get better as time goes on and I see more ways in which we could eliminate unwanted false positives. So far, the responses from the suicide hotline helper bot were really positive, with a large number of it's responses being favorited and retweeted. 
+
+#I took all measures to implement a way to pull back and wait a while when the account is being rate limited, and the tweets-per-minute the account was making wasn't unreasonable as it was. 
+
+#I'm not a large corporation or a revenue-generating spam-bot. I am simply a recent graduate from SUNY University at Buffalo (my name is Kevin Skompinski and my student email is kevinsko@buffalo.edu) and this was a personal project that I've been meaning to implement for a while now. I generate no money from this and I will never have the intention to do so. However, I feel like this project has the power to really help people if they are in crisis, and could potentially do some good for people in their time of need. I do know the there are automated Twitter bots that reply to people under certain circumstances (@StealthMountain (https://twitter.com/StealthMountain) and @DBZNappa (https://twitter.com/DBZNappa) for example), so there must be ways to impliment a Twitter bot properly and not get suspended. I checked the development site and searched around for answers, but I could not find a reason why this account would be suspended. If it was tweeting too quickly, I could adjust the parameters for the secondary sentiment filtering and increase the mood and emotional thresholds to qualify for a response. If there is possibly anyone to talk to on the development team that would be able to help me avoid this situation again, that would be amazing. Or if there was some protocol to prevent what has caused this and continue to allow the account to operate, that information would be helpful too. I am an avid Twitter user with my main account being @fuckKevon, so I know how the Twitter community works and respect the guidelines in place. 
+
+#Any help would be great, and having the account un-suspended and allowed to run  and help provide information for those in crisis would be phenomenal. 
+
+#Thanks!
+#~ Kevin Skompinski
