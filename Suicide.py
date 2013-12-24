@@ -60,8 +60,10 @@ pronouns = ["me", "myself", "i", "my", "i'm", "i've", "i'll", "i'd"]
 desires = ["want", "will", "could", "would", "should", "commit", "going", "go", "wish", "need", "must", "think", "thinking", "desire", "contemplating"]
 
 #List of words to set the flag variable in the mood() method to false that prevents common false positives of the word suicide.
+#They don'tcontain apostrophes. 
 falsePositives = ["silence", "girls", "girl", "rather", "jk", "lol", "threat", "threatening", "rt", "retweet", "justin", "bieber", "literally", "hair", "funny", "hilarious", "rip", "selfish", 
-                  "stupid", "murder", "kidding", "you", "your", "youre", "theyre", "if", "shaving", "out", "it", "playlist", "bombers", "bomber", "say", "never", "commited", "when", "trip"]
+                  "stupid", "murder", "kidding", "you", "your", "youre", "theyre", "if", "shaving", "out", "it", "playlist", "bombers", "bomber", "say", "never", "commited", "when", "trip", "youd",
+                  "phone"]
 
 #The "kill myself" is in it's own special condition to prevent the common false positives like "I want to kill my dog after he ate my homework"
 #triggerWords2 catches people who are talking about how they are depressed, which doesn't need a desire keyword included since they don't desire to be depressed.
@@ -157,7 +159,7 @@ def mood(text):
     finalRatio = ((float(ratio)/float(count)*100.0))
     return (finalMood, overallEmotion, finalRatio, flag)
 
-def reply(postID, name, mood, emotion, ratio, flag):
+def reply(tweet, postID, name, mood, emotion, ratio, flag):
     replyText = "@"+name+" No matter what you're dealing with, hurting yourself isn't the answer. Please call 1-800-273-8255 if you need to talk."
     if flag == True:
         #Going to slowly ramp up the bot in an effort to prevent it being caught in the spam filter.
@@ -167,6 +169,7 @@ def reply(postID, name, mood, emotion, ratio, flag):
             try:
                 Api.update_status(replyText, in_reply_to_status_id=postID)
                 usersTweeted.append(name)
+                print tweet
             except tweepy.TweepError as e:
                 errorHandler(e.message[0]['code'])
                 #print e
@@ -271,8 +274,7 @@ class StdOutListener(StreamListener):
                     tweetEmotion = data[1]
                     tweetRatio = data[2]
                     flag = data[3]
-                    reply(status.id, str(status.author.screen_name), tweetMood, tweetEmotion, tweetRatio, flag)
-                    print tweet
+                    reply(tweet, status.id, str(status.author.screen_name), tweetMood, tweetEmotion, tweetRatio, flag)
             
             elif mention == "@"+botName and author in usersTweeted and author not in usersReplied:
                     data = mood(tweet)
