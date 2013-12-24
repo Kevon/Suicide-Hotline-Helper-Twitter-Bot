@@ -10,6 +10,7 @@ import time
 from math import sqrt
 import atexit
 import smtplib
+from random import choice
 
 Consumer_key="MUd9wj7EFReddRAIv6MdXQ"
 Consumer_secret="oXc0Lqq2JFfgOckvQjBiqAvZzZRfQAHP78je7EAcxc"
@@ -38,11 +39,17 @@ followingNames = []
 followingIDs = Api.friends_ids()
 
 usersTweeted = []
+usersReplied = []
 
 myUserName = "fuckKevon"
 myUserInfo = Api.get_user(myUserName)
 
 myEmail = "kevons5252@gmail.com"
+
+botInfo = Api.me()
+botName = botInfo.screen_name
+botID = botInfo.id
+
 botEmail = "hotlinehelperbot@gmail.com"
 botEmailPassword = "qw213er4"
 
@@ -53,7 +60,8 @@ pronouns = ["me", "myself", "i", "my", "i'm", "i've", "i'll", "i'd"]
 desires = ["want", "will", "could", "would", "should", "commit", "going", "go", "wish", "need", "must", "think", "thinking", "desire", "contemplating"]
 
 #List of words to set the flag variable in the mood() method to false that prevents common false positives of the word suicide.
-falsePositives = ["silence", "girls", "girl", "rather", "jk", "lol", "threat", "threatening", "rt", "retweet", "justin", "bieber", "literally", "hair", "funny", "hilarious", "rip", "selfish", "stupid", "murder", "kidding", "you", "your", "youre", "if", "shaving", "out"]
+falsePositives = ["silence", "girls", "girl", "rather", "jk", "lol", "threat", "threatening", "rt", "retweet", "justin", "bieber", "literally", "hair", "funny", "hilarious", "rip", "selfish", 
+                  "stupid", "murder", "kidding", "you", "your", "youre", "theyre", "if", "shaving", "out", "it", "playlist", "bombers", "bomber", "say", "never", "commited", "when", "trip"]
 
 #The "kill myself" is in it's own special condition to prevent the common false positives like "I want to kill my dog after he ate my homework"
 #triggerWords2 catches people who are talking about how they are depressed, which doesn't need a desire keyword included since they don't desire to be depressed.
@@ -73,6 +81,7 @@ def populateTrackList():
         for p in pronouns:
            #trackList.append(t+" "+p)
            pass
+    trackList.append(botName)
 
 def mood(text):
     overallMood = 0
@@ -148,20 +157,46 @@ def mood(text):
     finalRatio = ((float(ratio)/float(count)*100.0))
     return (finalMood, overallEmotion, finalRatio, flag)
 
-def reply(postID, name):
+def reply(postID, name, mood, emotion, ratio):
     replyText = "@"+name+" No matter what you're dealing with, hurting yourself isn't the answer. Please call 1-800-273-8255 if you need to talk."
-    try:
-        Api.update_status(replyText, in_reply_to_status_id=postID)
-        usersTweeted.append(name)
-    except tweepy.TweepError as e:
-        errorHandler(e.message[0]['code'])
-        #print e
+    if flag == True:
+        #Going to slowly ramp up the bot in an effort to prevent it being caught in the spam filter.
+        #End values will be tweetMood <= -15.0 and tweetEmotion > 5 and tweetRatio > 10.0 or tweetMood < 20.0 and tweetEmotion >= 15 and tweetRatio > 10.0 or tweetMood < 20.0 and tweetEmotion > 10 and tweetRatio >= 20.0
+        #Start values will be 10 more for each section, so we get a smaller number of tweets sent out and they'll only be the ones that are really negative or emotional.
+        if mood <= -20.0 and emotion > 5 and ratio > 10.0 or mood < 20.0 and emotion >= 20 and ratio > 10.0 or mood < 20.0 and emotion > 10 and ratio >= 25.0:
+            try:
+                Api.update_status(replyText, in_reply_to_status_id=postID)
+                usersTweeted.append(name)
+            except tweepy.TweepError as e:
+                errorHandler(e.message[0]['code'])
+                #print e
+            print tweet
+
+def respond(postID, name, mood):
+    positiveResponds = ["<3", "Stay strong!", "Thanks for the support!"]
+    negativeResponds = ["Sorry.", "Just trying to help in case you need it..."]
+    if mood > 40:
+        respondText = "@"+name+" "+choice(positiveResponds)
+        try:
+            Api.update_status(respondText, in_reply_to_status_id=postID)
+            usersReplied.append(name)
+        except tweepy.TweepError as e:
+            errorHandler(e.message[0]['code'])
+    elif mood < -40:
+        respondText = "@"+name+" "+choice(negativeResponds)
+        try:
+            Api.update_status(respondText, in_reply_to_status_id=postID)
+            usersReplied.append(name)
+        except tweepy.TweepError as e:
+            errorHandler(e.message[0]['code'])
 
 def setFollowing():
     followingIDs = Api.friends_ids()
     for person in followingIDs:
         user = Api.get_user(person)
         followingNames.append(str(user.screen_name))
+    #followingIDs.append(botID)
+    #followingNames.append(botName)
 
 def buildUsers():
     usersTweeted = []
@@ -172,48 +207,77 @@ def buildUsers():
         usersTweeted.append(name)
     u.close()
 
+    usersReplied = []
+    r = open('usersReplied.txt','r')
+    replied = u.read()
+    repliedList = replied.split('\n')
+    for name in repliedList:
+        usersReplied.append(name)
+    r.close()
+
 def writeUsers():
     u = open('userList.txt','a')
     for name in usersTweeted:
         u.write(name+"\n")
     u.close()
 
-def sendEmail(info, details):
+    r = open('usersReplied.txt','a')
+    for name in usersReplied:
+        r.write(name+"\n")
+    r.close()
+
+def sendEmail(text, details):
     try:
-        message = str(info)+" Error recieved from Twitter.\n"+details
+        message = text+"\n\n"+details
         server = smtplib.SMTP('smtp.gmail.com:587')
         server.ehlo()
         server.starttls()
         server.login(botEmail, botEmailPassword)
-        server.sendmail(botEmail, myEmail, message)         
+        server.sendmail(botEmail, myEmail, message)
+        print "Successfully sent email to "+myEmail       
         return True
     except SMTPException:
+        print "ERROR: Failed to send email to "+myEmail
         return False
+
+def sendDM(text, status):
+    try:
+        Api.send_direct_message(screen_name=myUserName,text=text)
+    except tweepy.TweepError as e:
+        error = str(status)+" ERROR: Too many direct messages sent to myself."
+        print error
+        #Send me an email if the direct message failed.
+        sendEmail(error):       
     
 class StdOutListener(StreamListener):
     def on_status(self, status):
+            tweet = status.text.encode('utf-8')
             author = str(status.author.screen_name)
+            mention = tweet.split(' ', 1)[0]
+            
             if author in followingNames:
                 try:
                     Api.retweet(status.id)
                 except tweepy.TweepError as e:
                     errorHandler(e.message[0]['code'])
+            
             elif author not in usersTweeted:
                 try:
                     swag = status.retweeted_status.retweet_count
                     #This is just a filler line to see if a Tweet caught in the stream is a retweet, which is something we dont want.
                     #If it doesnt have the retweet_count attribute, then it is not a retweet and throws the AttributeError. Also "pass" doesn't seem to work.
                 except AttributeError:
-                    tweet = status.text.encode('utf-8')
                     data = mood(tweet)
                     tweetMood = data[0]
                     tweetEmotion = data[1]
                     tweetRatio = data[2]
                     flag = data[3]
-                    if flag == True:
-                        if tweetMood <= -15.0 and tweetEmotion > 5 and tweetRatio > 10.0 or tweetMood < 20.0 and tweetEmotion >= 15 and tweetRatio > 10.0 or tweetMood < 20.0 and tweetEmotion > 10 and tweetRatio >= 20.0:
-                            print tweet
-                            reply(status.id, str(status.author.screen_name))
+                    reply(status.id, str(status.author.screen_name), tweetMood, tweetEmotion, tweetRatio)
+            
+            elif mention = "@"+botName and author in usersTweeted and author not in usersReplied:
+                    data = mood(tweet)
+                    tweetMood = data[0]
+                    respond(status.id, str(status.author.screen_name), tweetMood)
 
     def on_error(self, status):
         errorHandler(status)
@@ -251,51 +315,49 @@ def checkConnection():
     return False
 
 def errorHandler(status):
+    error = ""
     if status == 406:
         pass 
         #We don't really care about 406 errors.
     elif status == 413:
-        print "413 ERROR: Too many phrases being tracked. The limit is 400... We currently have "+str(len(trackList))+" attributes being tracked."
+        error = str(status)+" ERROR: Too many phrases being tracked. The limit is 400... We currently have "+str(len(trackList))+" attributes being tracked."
+        print error
 
     elif status == 420:
-        print "420 ERROR: Too many connections in a short amount of time and our stream is being rate limited."
+        error = str(status)+" ERROR: Too many connections in a short amount of time and our stream is being rate limited."
+        print error
         time.sleep(600)
 
     elif status == 187:
-        print "187 ERROR: Duplicate status."
+        error = str(status)+" ERROR: Duplicate status."
+        print error
 
     elif status == 185:
-        print "185 ERROR: Post limit has been reached. Going to send an alert email and wait for a half hour before resuming."
-        if sendEmail(status, "Bot paused for a half hour."):
-            print "Successfully sent email to "+myEmail
-        else:
-            print "ERROR: Failed to send email to "+myEmail
+        error = str(status)+" ERROR: Post limit has been reached. Going to wait for a half hour before resuming."
+        print error
+        sendEmail(error):
         time.sleep(1800)
 
     elif status == 403:
-        print "403 ERROR: Forbidden action. Could be a duplicate Tweet."
+        error = str(status)+" ERROR: Forbidden action. Could be a duplicate Tweet."
+        print error
 
     elif status == 64:
-        print "64 ERROR: Account Suspended. Sending an email and shutting the bot down."
-        if sendEmail(status, "SHUT DOWN: Need to manually restart."):
-            print "Successfully sent email to "+myEmail
-        else:
-            print "ERROR: Failed to send email to "+myEmail
-        sys.exit(0)
+        error = str(status)+" ERROR: Account Suspended. Shutting the bot down."
+        print error
+        sendEmail(error):
+        errorExit()
 
     else:
-        print str(status)+" ERROR: Unknow problem."
+        error = str(status)+" ERROR: Unknow problem."
+        print error
     
     #Send me a direct message about the error status if possible... Email me if even that failed.
-    try:
-        Api.send_direct_message(screen_name=myUserName,text=str(status)+" Error.")
-    except tweepy.TweepError as e:
-        print "151 ERROR: Too many direct messages sent to myself."
-        #Isn't this ironic.
-        if sendEmail(status, "Too many DM's send."):
-            print "Successfully sent email to "+myEmail
-        else:
-            print "ERROR: Failed to send email to "+myEmail
+    sendDM(error, status)   
+
+def errorExit():
+    sendEmail("BOT SHUT DOWN. NEED TO RESTART!")
+    sys.exit(0)
 
 @atexit.register
 def onExit():
