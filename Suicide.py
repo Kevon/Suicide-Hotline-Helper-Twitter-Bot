@@ -157,7 +157,7 @@ def mood(text):
     finalRatio = ((float(ratio)/float(count)*100.0))
     return (finalMood, overallEmotion, finalRatio, flag)
 
-def reply(postID, name, mood, emotion, ratio):
+def reply(postID, name, mood, emotion, ratio, flag):
     replyText = "@"+name+" No matter what you're dealing with, hurting yourself isn't the answer. Please call 1-800-273-8255 if you need to talk."
     if flag == True:
         #Going to slowly ramp up the bot in an effort to prevent it being caught in the spam filter.
@@ -209,7 +209,7 @@ def buildUsers():
 
     usersReplied = []
     r = open('usersReplied.txt','r')
-    replied = u.read()
+    replied = r.read()
     repliedList = replied.split('\n')
     for name in repliedList:
         usersReplied.append(name)
@@ -247,7 +247,7 @@ def sendDM(text, status):
         error = str(status)+" ERROR: Too many direct messages sent to myself."
         print error
         #Send me an email if the direct message failed.
-        sendEmail(error):       
+        sendEmail(error)     
     
 class StdOutListener(StreamListener):
     def on_status(self, status):
@@ -272,9 +272,9 @@ class StdOutListener(StreamListener):
                     tweetEmotion = data[1]
                     tweetRatio = data[2]
                     flag = data[3]
-                    reply(status.id, str(status.author.screen_name), tweetMood, tweetEmotion, tweetRatio)
+                    reply(status.id, str(status.author.screen_name), tweetMood, tweetEmotion, tweetRatio, flag)
             
-            elif mention = "@"+botName and author in usersTweeted and author not in usersReplied:
+            elif mention == "@"+botName and author in usersTweeted and author not in usersReplied:
                     data = mood(tweet)
                     tweetMood = data[0]
                     respond(status.id, str(status.author.screen_name), tweetMood)
@@ -335,7 +335,7 @@ def errorHandler(status):
     elif status == 185:
         error = str(status)+" ERROR: Post limit has been reached. Going to wait for a half hour before resuming."
         print error
-        sendEmail(error):
+        sendEmail(error)
         time.sleep(1800)
 
     elif status == 403:
@@ -345,7 +345,7 @@ def errorHandler(status):
     elif status == 64:
         error = str(status)+" ERROR: Account Suspended. Shutting the bot down."
         print error
-        sendEmail(error):
+        sendEmail(error)
         errorExit()
 
     else:
