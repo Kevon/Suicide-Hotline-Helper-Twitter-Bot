@@ -118,7 +118,7 @@ def mood(text):
                 overallMood = overallMood-1
                 ratio = ratio + 1
             overallEmotion = overallEmotion+1
-        if lowerCaseWord == 'fucking' or 'fuckin' or 'very' or 'super':
+        if lowerCaseWord == 'fucking' or 'fuckin' or 'very' or 'super' or 'really':
             exclamations = exclamations+1
             overallEmotion = overallEmotion+1
         if lowerCaseWord in falsePositives:
@@ -170,11 +170,10 @@ def reply(postID, name, mood, emotion, ratio, flag):
             except tweepy.TweepError as e:
                 errorHandler(e.message[0]['code'])
                 #print e
-            print tweet
 
 def respond(postID, name, mood):
-    positiveResponds = ["<3", "Stay strong!", "Thanks for the support!"]
-    negativeResponds = ["Sorry.", "Just trying to help in case you need it..."]
+    positiveResponds = ["<3", "Stay strong!", "Thanks for the support!", "Thanks, have a great day!"]
+    negativeResponds = ["Sorry.", "Just trying to help in case you need it...", "Have a nice day."]
     if mood > 40:
         respondText = "@"+name+" "+choice(positiveResponds)
         try:
@@ -273,6 +272,7 @@ class StdOutListener(StreamListener):
                     tweetRatio = data[2]
                     flag = data[3]
                     reply(status.id, str(status.author.screen_name), tweetMood, tweetEmotion, tweetRatio, flag)
+                    print tweet
             
             elif mention == "@"+botName and author in usersTweeted and author not in usersReplied:
                     data = mood(tweet)
