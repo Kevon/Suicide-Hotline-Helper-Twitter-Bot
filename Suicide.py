@@ -63,7 +63,7 @@ desires = ["want", "will", "could", "would", "should", "commit", "going", "go", 
 #They don'tcontain apostrophes. 
 falsePositives = ["silence", "girls", "girl", "rather", "jk", "lol", "threat", "threatening", "rt", "retweet", "justin", "bieber", "literally", "hair", "funny", "hilarious", "rip", "selfish", 
                   "stupid", "murder", "kidding", "you", "your", "youre", "theyre", "if", "shaving", "out", "it", "playlist", "bombers", "bomber", "say", "never", "commited", "when", "trip", "youd",
-                  "phone"]
+                  "phone", "tryna"]
 
 #The "kill myself" is in it's own special condition to prevent the common false positives like "I want to kill my dog after he ate my homework"
 #triggerWords2 catches people who are talking about how they are depressed, which doesn't need a desire keyword included since they don't desire to be depressed.
@@ -175,16 +175,16 @@ def reply(tweet, postID, name, mood, emotion, ratio, flag):
                 #print e
 
 def respond(postID, name, mood):
-    positiveResponds = ["<3", "Stay strong!", "Thanks for the support!", "Thanks, have a great day!"]
-    negativeResponds = ["Sorry.", "Just trying to help in case you need it...", "Have a nice day."]
-    if mood > 40:
+    positiveResponds = ["<3", "Stay strong!", "Stay awesome!" "Thanks for the support!", "Thanks, have a great day!", ":)"]
+    negativeResponds = ["Sorry...", "Just trying to help in case you need it...", "Ok then. Have a nice day..."]
+    if mood > 20.0:
         respondText = "@"+name+" "+choice(positiveResponds)
         try:
             Api.update_status(respondText, in_reply_to_status_id=postID)
             usersReplied.append(name)
         except tweepy.TweepError as e:
             errorHandler(e.message[0]['code'])
-    elif mood < -40:
+    elif mood < -20.0:
         respondText = "@"+name+" "+choice(negativeResponds)
         try:
             Api.update_status(respondText, in_reply_to_status_id=postID)
@@ -228,14 +228,13 @@ def writeUsers():
         r.write(name+"\n")
     r.close()
 
-def sendEmail(text, details):
+def sendEmail(error):
     try:
-        message = text+"\n\n"+details
         server = smtplib.SMTP('smtp.gmail.com:587')
         server.ehlo()
         server.starttls()
         server.login(botEmail, botEmailPassword)
-        server.sendmail(botEmail, myEmail, message)
+        server.sendmail(botEmail, myEmail, error)
         print "Successfully sent email to "+myEmail       
         return True
     except SMTPException:
@@ -280,6 +279,7 @@ class StdOutListener(StreamListener):
                     data = mood(tweet)
                     tweetMood = data[0]
                     respond(status.id, str(status.author.screen_name), tweetMood)
+                    print "REPLY RECEIVED!"
 
     def on_error(self, status):
         errorHandler(status)
