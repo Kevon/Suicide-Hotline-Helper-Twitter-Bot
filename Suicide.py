@@ -63,7 +63,7 @@ desires = ["want", "will", "could", "would", "should", "commit", "going", "go", 
 #They don'tcontain apostrophes. 
 falsePositives = ["silence", "girls", "girl", "rather", "jk", "lol", "threat", "threatening", "rt", "retweet", "justin", "bieber", "literally", "hair", "funny", "hilarious", "rip", "selfish", 
                   "stupid", "murder", "kidding", "you", "your", "youre", "theyre", "if", "shaving", "out", "it", "playlist", "bombers", "bomber", "say", "never", "commited", "when", "trip", "youd",
-                  "phone", "tryna"]
+                  "phone", "tryna", "or", "maybe"]
 
 #The "kill myself" is in it's own special condition to prevent the common false positives like "I want to kill my dog after he ate my homework"
 #triggerWords2 catches people who are talking about how they are depressed, which doesn't need a desire keyword included since they don't desire to be depressed.
@@ -176,7 +176,7 @@ def reply(tweet, postID, name, mood, emotion, ratio, flag):
 
 def respond(postID, name, mood):
     positiveResponds = ["<3", "Stay strong!", "Stay awesome!" "Thanks for the support!", "Thanks, have a great day!", ":)"]
-    negativeResponds = ["Sorry...", "Just trying to help in case you need it...", "Ok then. Have a nice day..."]
+    negativeResponds = ["Sorry...", "Just trying to help in case you need it...", "Ok then. Have a nice day...", ":("]
     if mood > 20.0:
         respondText = "@"+name+" "+choice(positiveResponds)
         try:
