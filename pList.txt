@@ -987,6 +987,7 @@ transcend
 testimony
 transient
 thank
+thanks
 transparent
 thankful
 triumph

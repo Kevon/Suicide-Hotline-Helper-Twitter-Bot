@@ -63,7 +63,7 @@ desires = ["want", "will", "could", "would", "should", "commit", "going", "go", 
 #They don'tcontain apostrophes. 
 falsePositives = ["silence", "girls", "girl", "rather", "jk", "lol", "threat", "threatening", "rt", "retweet", "justin", "bieber", "literally", "hair", "funny", "hilarious", "rip", "selfish", 
                   "stupid", "murder", "kidding", "you", "your", "youre", "theyre", "if", "shaving", "out", "it", "playlist", "bombers", "bomber", "say", "never", "commited", "when", "trip", "youd",
-                  "phone", "tryna", "or", "maybe"]
+                  "phone", "tryna", "or", "maybe", "trying"]
 
 #The "kill myself" is in it's own special condition to prevent the common false positives like "I want to kill my dog after he ate my homework"
 #triggerWords2 catches people who are talking about how they are depressed, which doesn't need a desire keyword included since they don't desire to be depressed.
@@ -104,7 +104,7 @@ def mood(text):
     previous = ''
     for word in words:
         wordcaps = 0
-        tempWord = word.strip(".?~#-!,")
+        tempWord = word.strip(".?~#-!,'")
         lowerCaseWord = tempWord.lower()
         if lowerCaseWord in pList:
             if previous == 'not':
@@ -175,8 +175,8 @@ def reply(tweet, postID, name, mood, emotion, ratio, flag):
                 #print e
 
 def respond(postID, name, mood):
-    positiveResponds = ["<3", "Stay strong!", "Stay awesome!" "Thanks for the support!", "Thanks, have a great day!", ":)"]
-    negativeResponds = ["Sorry...", "Just trying to help in case you need it...", "Ok then. Have a nice day...", ":("]
+    positiveResponds = ["<3", "Stay strong!", "Stay awesome!", "Thank you! :)", "Thanks! <3", "Thanks for the support!", "Thanks, have a great day!", ":)"]
+    negativeResponds = ["Sorry... Have a good day.", "I'm sorry... Have a good day.", "Just trying to help in case you need it...", "Ok then. Have a nice day...", ":("]
     if mood > 20.0:
         respondText = "@"+name+" "+choice(positiveResponds)
         try:

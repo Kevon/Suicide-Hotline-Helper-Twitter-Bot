@@ -193,6 +193,7 @@ cancellations
 cancelled
 canceling
 cancels
+arent
 careless
 carelessly
 carelessness
@@ -376,6 +377,7 @@ corruptions
 corruptly
 corruptness
 costly
+couldnt
 counterclaim
 counterclaimed
 counterclaiming
@@ -2604,6 +2606,7 @@ inhumane
 injusticed
 insane
 insignificant
+cant
 insincere
 insulted
 intense
@@ -2799,14 +2802,15 @@ noose
 goodbye
 bye
 remorse
-can't
-don't
-won't
+dont
+wont
 wouldn't
 nothing
 never
 fml
 shoot
+shouldnt
+wouldnt
 hang
 :&lt;
 :(
